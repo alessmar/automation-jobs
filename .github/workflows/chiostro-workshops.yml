@@ -2,8 +2,8 @@ name: Chiostro workshops email
 
 on:
   schedule:
-    # GitHub Actions cron is UTC. This is 07:30 Europe/Rome during daylight saving time.
-    - cron: "30 5 * * 1,4,6"
+    - cron: "30 7 * * 1,4,6"
+      timezone: "Europe/Rome"
   workflow_dispatch:
 
 jobs:

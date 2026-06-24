@@ -46,4 +46,4 @@ account password. Google requires 2-Step Verification before app passwords are
 available.
 
 The GitHub Actions workflow runs on Monday, Thursday, and Saturday at 07:30
-Europe/Rome time during daylight saving time.
+Europe/Rome time.
