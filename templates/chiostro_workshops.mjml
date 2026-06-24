@@ -1,0 +1,86 @@
+<mjml>
+  <mj-head>
+    <mj-title>{{ subject }}</mj-title>
+    <mj-preview>Nuove date e posti disponibili per i prossimi workshop.</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="Arial, Helvetica, sans-serif" />
+      <mj-text color="#27313f" font-size="15px" line-height="1.5" />
+      <mj-section padding="0" />
+      <mj-column padding="0" />
+      <mj-button background-color="#8a4d2f" color="#ffffff" border-radius="4px" font-weight="700" inner-padding="12px 18px" />
+    </mj-attributes>
+    <mj-style>
+      .workshop-table th {
+        background-color: #f2e8df;
+        color: #2c1f18;
+        font-weight: 700;
+      }
+      .workshop-table th,
+      .workshop-table td {
+        border-bottom: 1px solid #eadbd0;
+        padding: 12px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      .workshop-table a {
+        color: #7a3f25;
+        font-weight: 700;
+        text-decoration: none;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#f7f1ec">
+    <mj-section padding="28px 18px 0">
+      <mj-column>
+        <mj-text font-size="13px" color="#7f695b" padding="0 0 8px">Chiostro delle Illusioni</mj-text>
+        <mj-text font-size="26px" font-weight="700" color="#2c1f18" line-height="1.2" padding="0 0 10px">
+          Prossimi workshop disponibili
+        </mj-text>
+        <mj-text color="#5d4b40" padding="0 0 22px">
+          Riepilogo aggiornato al {{ generated_at }}.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" border-radius="8px" padding="0">
+      <mj-column>
+        <mj-table css-class="workshop-table" padding="0" font-size="14px" line-height="1.45" color="#27313f">
+          <tr>
+            <th>Workshop</th>
+            <th>Data</th>
+            <th>Posti</th>
+          </tr>
+          {% for workshop in workshops %}
+          <tr>
+            <td><a href="{{ workshop.url }}">{{ workshop.title }}</a></td>
+            <td>{{ workshop.date }}</td>
+            <td>{{ workshop.seats }}</td>
+          </tr>
+          {% endfor %}
+        </mj-table>
+      </mj-column>
+    </mj-section>
+
+    {% if requested_workshops %}
+    <mj-section padding="18px 0 0">
+      <mj-column>
+        <mj-text font-size="13px" font-weight="700" color="#2c1f18" padding="0 0 6px">
+          Workshop su richiesta
+        </mj-text>
+        <mj-text font-size="14px" color="#4f4138" padding="0">
+          {% for workshop in requested_workshops %}
+          <a href="{{ workshop.url }}" style="color:#7a3f25;font-weight:700;text-decoration:none;">{{ workshop.title }}</a>{% if not loop.last %}, {% endif %}
+          {% endfor %}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    {% endif %}
+
+    <mj-section padding="0 0 28px">
+      <mj-column>
+        <mj-spacer height="28px" />
+      </mj-column>
+    </mj-section>
+
+  </mj-body>
+</mjml>

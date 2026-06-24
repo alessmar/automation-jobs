@@ -1,0 +1,40 @@
+name: Chiostro workshops email
+
+on:
+  schedule:
+    # GitHub Actions cron is UTC. The script gates this daily trigger to every 4 days.
+    # This is 07:25 Europe/Rome during daylight saving time.
+    - cron: "25 5 * * *"
+  workflow_dispatch:
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Send workshop email
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_FROM: ${{ secrets.GMAIL_ADDRESS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            python scripts/chiostro_workshops_email.py --schedule-anchor-date 2026-06-24 --schedule-every-days 4
+          else
+            python scripts/chiostro_workshops_email.py
+          fi
