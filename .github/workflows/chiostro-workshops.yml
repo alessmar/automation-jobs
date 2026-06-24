@@ -2,9 +2,8 @@ name: Chiostro workshops email
 
 on:
   schedule:
-    # GitHub Actions cron is UTC. The script gates this daily trigger to every 3 days.
-    # This is 07:30 Europe/Rome during daylight saving time.
-    - cron: "30 5 * * *"
+    # GitHub Actions cron is UTC. This is 07:30 Europe/Rome during daylight saving time.
+    - cron: "30 5 * * 1,4,6"
   workflow_dispatch:
 
 jobs:
@@ -32,9 +31,4 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           EMAIL_FROM: ${{ secrets.GMAIL_ADDRESS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-        run: |
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            python scripts/chiostro_workshops_email.py --schedule-anchor-date 2026-06-24 --schedule-every-days 3
-          else
-            python scripts/chiostro_workshops_email.py
-          fi
+        run: python scripts/chiostro_workshops_email.py

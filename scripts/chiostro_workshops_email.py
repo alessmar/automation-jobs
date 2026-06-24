@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import argparse
 import os
 import re
 import smtplib
@@ -278,23 +277,8 @@ def send_gmail_email(settings: Settings, html: str) -> None:
     log(f"Email sent via Gmail SMTP from {settings.from_email} to {settings.to_email}.")
 
 
-def should_run_today(anchor_date: str, every_days: int) -> bool:
-    anchor = date.fromisoformat(anchor_date)
-    return (date.today() - anchor).days % every_days == 0
-
-
-def run(dry_run: bool, schedule_anchor_date: str | None, schedule_every_days: int | None) -> int:
+def run(dry_run: bool) -> int:
     log(f"Starting Chiostro workshop email job: dry_run={dry_run}")
-    if schedule_anchor_date and schedule_every_days:
-        log(f"Checking schedule gate: anchor={schedule_anchor_date}, every_days={schedule_every_days}")
-        if schedule_every_days < 1:
-            raise RuntimeError("--schedule-every-days must be greater than zero.")
-        if not should_run_today(schedule_anchor_date, schedule_every_days):
-            log(
-                f"Skipping run: today is not on the {schedule_every_days}-day schedule "
-                f"anchored at {schedule_anchor_date}."
-            )
-            return 0
 
     settings = load_settings()
     log(f"Loaded settings: template={settings.template_path}")
@@ -314,20 +298,13 @@ def run(dry_run: bool, schedule_anchor_date: str | None, schedule_every_days: in
 
 
 def parse_args() -> argparse.Namespace:
+    import argparse
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Generate the HTML and print it instead of sending the email.",
-    )
-    parser.add_argument(
-        "--schedule-anchor-date",
-        help="ISO date used as day 0 for interval scheduling, for example 2026-06-24.",
-    )
-    parser.add_argument(
-        "--schedule-every-days",
-        type=int,
-        help="Only run when today's date is an exact multiple of this many days from the anchor date.",
     )
     return parser.parse_args()
 
@@ -335,11 +312,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     try:
-        return run(
-            dry_run=args.dry_run,
-            schedule_anchor_date=args.schedule_anchor_date,
-            schedule_every_days=args.schedule_every_days,
-        )
+        return run(dry_run=args.dry_run)
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
