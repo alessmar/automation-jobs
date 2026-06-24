@@ -9,7 +9,7 @@ This job re-implements the n8n workflow that:
 1. Fetches `https://chiostrodelleillusioni.com/workshop-adulti-biella/`.
 2. Parses the page with BeautifulSoup and extracts available workshops plus `workshop su richiesta`.
 3. Renders a responsive MJML email template with linked workshop titles and a requested-workshops list.
-4. Sends an HTML email through Gmail SMTP every 4 days.
+4. Sends an HTML email through Gmail SMTP every 3 days.
 
 ### Required GitHub Actions secrets
 
@@ -46,5 +46,5 @@ account password. Google requires 2-Step Verification before app passwords are
 available.
 
 The GitHub Actions workflow runs daily and the script skips non-due days. The
-4-day cadence is anchored to `2026-06-24` so it does not reset at month
+3-day cadence is anchored to `2026-06-24` so it does not reset at month
 boundaries.
