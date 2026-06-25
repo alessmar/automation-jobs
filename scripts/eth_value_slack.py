@@ -12,12 +12,7 @@ import requests
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-
-DEFAULT_COINMARKETCAP_URL = "https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest"
-DEFAULT_SYMBOL = "ETH"
-DEFAULT_CONVERT = "EUR"
 REQUEST_TIMEOUT_SECONDS = 30
-
 
 @dataclass(frozen=True)
 class Settings:
@@ -39,24 +34,13 @@ def log(message: str) -> None:
     timestamp = datetime.now().isoformat(timespec="seconds")
     print(f"[{timestamp}] {message}", file=sys.stderr, flush=True)
 
-
-def load_multiplier() -> float:
-    value = env("ETH_MULTIPLIER")
-    if not value:
-        raise RuntimeError("Missing required environment variable: ETH_MULTIPLIER")
-    try:
-        return float(value)
-    except ValueError as exc:
-        raise RuntimeError("ETH_MULTIPLIER must be a numeric value.") from exc
-
-
 def load_settings() -> Settings:
     return Settings(
         coinmarketcap_api_key=env("COINMARKETCAP_API_KEY"),
-        coinmarketcap_url=env("COINMARKETCAP_URL", DEFAULT_COINMARKETCAP_URL) or DEFAULT_COINMARKETCAP_URL,
-        symbol=(env("COINMARKETCAP_SYMBOL", DEFAULT_SYMBOL) or DEFAULT_SYMBOL).upper(),
-        convert_currency=(env("COINMARKETCAP_CONVERT", DEFAULT_CONVERT) or DEFAULT_CONVERT).upper(),
-        multiplier=load_multiplier(),
+        coinmarketcap_url="https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest",
+        symbol="ETH",
+        convert_currency="EUR",
+        multiplier=env("ETH_MULTIPLIER"),
         slack_bot_token=env("SLACK_BOT_TOKEN"),
         slack_channel_id=env("SLACK_CHANNEL_ID"),
     )
