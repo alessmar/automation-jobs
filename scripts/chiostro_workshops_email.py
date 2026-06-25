@@ -240,6 +240,7 @@ def send_email(settings: Settings, html: str) -> None:
     missing = [
         name
         for name, value in {
+            "SMTP_HOST": settings.smtp_host,
             "SMTP_PASSWORD": settings.smtp_password,
             "EMAIL_FROM": settings.from_email,
             "EMAIL_TO": settings.to_email,

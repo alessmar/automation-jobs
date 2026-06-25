@@ -27,8 +27,8 @@ jobs:
 
       - name: Send workshop email
         env:
-          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           EMAIL_FROM: ${{ secrets.GMAIL_ADDRESS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: python scripts/chiostro_workshops_email.py
