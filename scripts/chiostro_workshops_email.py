@@ -183,8 +183,6 @@ def extract_workshop_data(raw_html: str, base_url: str) -> tuple[list[Workshop],
             continue
 
         if section == "available":
-            if SOLD_OUT_RE.search(seats_value or ""):
-                continue
             key = f"{parsed.title.lower()}|{parsed.date.lower()}|{parsed.url.lower()}"
             append_unique(workshops, seen_workshops, key, parsed)
         else:
