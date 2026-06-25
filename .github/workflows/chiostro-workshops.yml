@@ -2,7 +2,7 @@ name: Chiostro workshops email
 
 on:
   schedule:
-    - cron: "30 7 * * MON,THU,SAT"
+    - cron: "30 7 * * MON"
       timezone: "Europe/Rome"
   workflow_dispatch:
 
