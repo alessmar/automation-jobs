@@ -4,7 +4,7 @@ Small automation scripts intended to run from GitHub Actions.
 
 ## Chiostro workshop email
 
-Fetches the Chiostro workshop page, parses it with BeautifulSoup, renders the MJML email template, and sends it through Gmail.
+Fetches the Chiostro workshop page, parses it with BeautifulSoup, renders the MJML email template, and sends it by email.
 
 ```bash
 python -m pip install -r requirements.txt
