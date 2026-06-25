@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch Chiostro workshops, parse them deterministically, and email via Gmail."""
+"""Fetch Chiostro workshops, parse them deterministically, and email via SMTP."""
 
 from __future__ import annotations
 
@@ -19,10 +19,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from mjml import mjml_to_html
 
 
-DEFAULT_WORKSHOP_URL = "https://chiostrodelleillusioni.com/workshop-adulti-biella/"
 DEFAULT_SUBJECT = "Prossimi workshop al Chiostro delle Illusioni"
-DEFAULT_GMAIL_SMTP_HOST = "smtp.gmail.com"
-DEFAULT_GMAIL_SMTP_PORT = 587
 DEFAULT_TEMPLATE_PATH = "templates/chiostro_workshops.mjml"
 REQUEST_TIMEOUT_SECONDS = 45
 
@@ -54,10 +51,9 @@ class RequestedWorkshop:
 @dataclass(frozen=True)
 class Settings:
     workshop_url: str
-    gmail_address: str | None
-    gmail_app_password: str | None
-    gmail_smtp_host: str
-    gmail_smtp_port: int
+    smtp_password: str | None
+    smtp_host: str
+    smtp_port: int
     from_email: str | None
     to_email: str | None
     subject: str
@@ -76,12 +72,11 @@ def log(message: str) -> None:
 
 def load_settings() -> Settings:
     return Settings(
-        workshop_url=env("WORKSHOP_URL", DEFAULT_WORKSHOP_URL) or DEFAULT_WORKSHOP_URL,
-        gmail_address=env("GMAIL_ADDRESS"),
-        gmail_app_password=env("GMAIL_APP_PASSWORD"),
-        gmail_smtp_host=env("GMAIL_SMTP_HOST", DEFAULT_GMAIL_SMTP_HOST) or DEFAULT_GMAIL_SMTP_HOST,
-        gmail_smtp_port=int(env("GMAIL_SMTP_PORT", str(DEFAULT_GMAIL_SMTP_PORT)) or DEFAULT_GMAIL_SMTP_PORT),
-        from_email=env("EMAIL_FROM", env("GMAIL_ADDRESS")),
+        workshop_url="https://chiostrodelleillusioni.com/workshop-adulti-biella/",
+        smtp_password=env("SMTP_PASSWORD"),
+        smtp_host=env("SMTP_HOST"),
+        smtp_port=587,
+        from_email=env("EMAIL_FROM"),
         to_email=env("EMAIL_TO"),
         subject=env("EMAIL_SUBJECT", DEFAULT_SUBJECT) or DEFAULT_SUBJECT,
         template_path=Path(env("EMAIL_TEMPLATE_PATH", DEFAULT_TEMPLATE_PATH) or DEFAULT_TEMPLATE_PATH),
@@ -241,21 +236,20 @@ def render_email_html(settings: Settings, workshops: list[Workshop], requested_w
     return result.html
 
 
-def send_gmail_email(settings: Settings, html: str) -> None:
+def send_email(settings: Settings, html: str) -> None:
     missing = [
         name
         for name, value in {
-            "GMAIL_ADDRESS": settings.gmail_address,
-            "GMAIL_APP_PASSWORD": settings.gmail_app_password,
+            "SMTP_PASSWORD": settings.smtp_password,
             "EMAIL_FROM": settings.from_email,
             "EMAIL_TO": settings.to_email,
         }.items()
         if not value
     ]
     if missing:
-        raise RuntimeError(f"Missing required Gmail environment variables: {', '.join(missing)}")
+        raise RuntimeError(f"Missing required environment variables: {', '.join(missing)}")
 
-    log("Preparing Gmail SMTP message.")
+    log("Preparing SMTP message.")
     message = EmailMessage()
     message["From"] = settings.from_email
     message["To"] = settings.to_email
@@ -263,16 +257,16 @@ def send_gmail_email(settings: Settings, html: str) -> None:
     message.set_content("Il riepilogo dei workshop e disponibile nella versione HTML di questa email.")
     message.add_alternative(html, subtype="html")
 
-    log(f"Connecting to Gmail SMTP: host={settings.gmail_smtp_host}, port={settings.gmail_smtp_port}")
-    with smtplib.SMTP(settings.gmail_smtp_host, settings.gmail_smtp_port, timeout=REQUEST_TIMEOUT_SECONDS) as smtp:
+    log(f"Connecting to SMTP: host={settings.smtp_host}, port={settings.smtp_port}")
+    with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=REQUEST_TIMEOUT_SECONDS) as smtp:
         log("Starting SMTP TLS.")
         smtp.starttls()
-        log(f"Authenticating to Gmail SMTP as {settings.gmail_address}.")
-        smtp.login(settings.gmail_address, settings.gmail_app_password)
+        log(f"Authenticating to SMTP server.")
+        smtp.login(settings.from_email, settings.smtp_password)
         log(f"Sending email to {settings.to_email}.")
         smtp.send_message(message)
 
-    log(f"Email sent via Gmail SMTP from {settings.from_email} to {settings.to_email}.")
+    log(f"Email sent via SMTP from {settings.from_email} to {settings.to_email}.")
 
 
 def run(dry_run: bool) -> int:
@@ -286,11 +280,11 @@ def run(dry_run: bool) -> int:
     email_html = render_email_html(settings, workshops, requested_workshops)
 
     if dry_run:
-        log("Dry run enabled; printing generated HTML and skipping Gmail send.")
+        log("Dry run enabled; printing generated HTML and skipping email send.")
         print(email_html)
         return 0
 
-    send_gmail_email(settings, email_html)
+    send_email(settings, email_html)
     log("Job completed successfully.")
     return 0
 
