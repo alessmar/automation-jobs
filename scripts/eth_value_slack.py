@@ -34,13 +34,22 @@ def log(message: str) -> None:
     timestamp = datetime.now().isoformat(timespec="seconds")
     print(f"[{timestamp}] {message}", file=sys.stderr, flush=True)
 
+def parse_multiplier(value: str | None, default: float = 1.0) -> float:
+    if value in (None, ""):
+        return default
+    try:
+        return float(value)
+    except ValueError as exc:
+        raise RuntimeError(f"ETH_MULTIPLIER must be a number, got: {value!r}") from exc
+
+
 def load_settings() -> Settings:
     return Settings(
         coinmarketcap_api_key=env("COINMARKETCAP_API_KEY"),
         coinmarketcap_url="https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest",
         symbol="ETH",
         convert_currency="EUR",
-        multiplier=env("ETH_MULTIPLIER"),
+        multiplier=parse_multiplier(env("ETH_MULTIPLIER")),
         slack_bot_token=env("SLACK_BOT_TOKEN"),
         slack_channel_id=env("SLACK_CHANNEL_ID"),
     )
